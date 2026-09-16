@@ -6,7 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#050505">
-<title>Speed Reader Mobile</title>
+<title>Speed Reader</title>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
 <style>
 :root{
   --bg:#050505;--panel:#101010;--panel2:#181818;--line:#2b2b2b;
@@ -80,6 +84,7 @@ input[type=range]{width:100%;accent-color:#ddd}
 .readControls,.listenControls{display:none}
 .readControls.visible,.listenControls.visible{display:block}
 .note{font-size:12px;color:#777;line-height:1.4;margin-top:8px}
+.formatline{font-size:11px;color:#666;margin-top:7px}
 
 .focusMode{
   position:fixed!important;inset:0!important;z-index:999!important;
@@ -99,17 +104,16 @@ input[type=range]{width:100%;accent-color:#ddd}
   .sourcecard{grid-row:span 2}
 }
 </style>
-
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="apple-touch-icon" href="./icon-192.png">
-<meta name="apple-mobile-web-app-title" content="Speed Reader">
-
 </head>
 <body>
 
 <header>
   <div class="toprow">
-    <div class="brand">Speed <b>Reader</b> <span class="version">webapp v7</span> <span id="jsStatus" class="version" style="margin-left:6px">● script niet gestart</span></div>
+    <div class="brand">
+      Speed <b>Reader</b>
+      <span class="version">webapp v8</span>
+      <span id="jsStatus" class="version" style="margin-left:6px">● script niet gestart</span>
+    </div>
     <div class="tabs">
       <button id="readTab" class="active">Lezen</button>
       <button id="listenTab">Luisteren</button>
@@ -121,7 +125,7 @@ input[type=range]{width:100%;accent-color:#ddd}
 <section id="reader" class="reader">
   <div class="guide"></div>
   <div id="modeBadge" class="modebadge">Leesmodus</div>
-  <div id="placeholder" class="placeholder">Plak een tekst of open een EPUB.</div>
+  <div id="placeholder" class="placeholder">Plak een tekst of open een document.</div>
   <div id="word" class="word" aria-live="polite"></div>
 </section>
 <button id="focusExit" class="focusExit">Sluiten</button>
@@ -135,18 +139,21 @@ input[type=range]{width:100%;accent-color:#ddd}
     </div>
 
     <div class="sourcebar" style="margin-top:12px">
-      <label class="filebtn">📖 EPUB openen
-        <input id="epubInput" type="file" accept=".epub,application/epub+zip">
+      <label class="filebtn">📄 Document openen
+        <input id="documentInput" type="file"
+          accept=".epub,.pdf,.docx,.pages,application/epub+zip,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.apple.pages">
       </label>
-      <span id="epubStatus" class="status">Alles wordt lokaal op het apparaat verwerkt.</span>
+      <span id="documentStatus" class="status">Alles wordt lokaal op het apparaat verwerkt.</span>
     </div>
+
+    <div class="formatline">Ondersteund: EPUB · PDF · Word (.docx) · Pages (via ingebouwde PDF-preview)</div>
 
     <div id="chapterBox" class="row" style="display:none;margin-top:10px">
       <label class="small" for="chapterSelect">Hoofdstuk</label>
       <select id="chapterSelect" class="grow"></select>
     </div>
 
-    <textarea id="textInput" style="margin-top:10px" placeholder="Plak hier een tekst...">Welkom bij Speed Reader! Speed reading werkt door woorden snel na elkaar op één vaste plek te tonen. Plak tekst, of laad een EPub-bestand. Je kunt ook een luistermodus gebruiken. Kies een taal en een stem en laat Safari de tekst voorlezen.</textarea>
+    <textarea id="textInput" style="margin-top:10px" placeholder="Plak hier een tekst...">Speed reading werkt door woorden snel na elkaar op één vaste plek te tonen. Je kunt ook een EPUB, PDF, Word-document of Pages-bestand openen. In de luistermodus kan de tekst worden voorgelezen.</textarea>
   </section>
 
   <section id="readControls" class="card readControls visible">
@@ -196,11 +203,13 @@ input[type=range]{width:100%;accent-color:#ddd}
     </div>
 
     <div id="speechNote" class="note">
-      Er verschijnen maximaal twee stemmen voor de gekozen taal. Als iOS geen stemmenlijst teruggeeft, gebruikt de app automatisch de standaardstem voor die taal.
+      Er verschijnen maximaal twee stemmen voor de gekozen taal.
     </div>
   </section>
 </main>
 
+<!-- PDF.js wordt alleen gebruikt om de tekstlaag van PDF-bestanden lokaal uit te lezen. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="./app.js" defer></script>
 </body>
 </html>

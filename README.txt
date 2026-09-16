@@ -1,16 +1,26 @@
-SPEED READER WEBAPP v7
+SPEED READER WEBAPP v8
 
-Belangrijk voor iPhone:
-Deze app moet via een echte http(s)-website worden geopend.
-Een .html-bestand openen vanuit Bestanden, ChatGPT-bijlagepreview of Quick Look
-kan de pagina wel tonen, maar JavaScript niet uitvoeren.
+Ondersteunde invoer
+- EPUB
+- PDF
+- Word (.docx)
+- Apple Pages (.pages), wanneer het bestand een PDF-preview bevat
+- Handmatig geplakte tekst
 
-Snelle controle:
-Bovenaan naast 'webapp v7' moet '● actief' in groen staan.
-Blijft daar '● script niet gestart' staan, dan wordt JavaScript niet uitgevoerd.
+Niet ondersteund
+- Oud Word-formaat .doc
+- Gesloten/DRM-beveiligde documenten
+- Scans/PDF's zonder tekstlaag (geen OCR)
+- Pages-bestanden zonder ingebouwde PDF-preview; exporteer die eerst als PDF of .docx
 
-Publiceren:
-Upload ALLE bestanden uit deze map naar dezelfde webmap:
+BELANGRIJK VOOR PDF
+PDF-import gebruikt PDF.js vanaf cdnjs. De eerste keer dat een PDF wordt geopend
+is dus een internetverbinding nodig om de PDF-engine te laden. Daarna kan de
+browser/service worker deze bron doorgaans cachen.
+
+INSTALLEREN OP GITHUB PAGES
+Vervang in je bestaande speed-reader repository de oude bestanden door ALLE
+bestanden uit deze map:
 - index.html
 - app.js
 - manifest.webmanifest
@@ -18,8 +28,13 @@ Upload ALLE bestanden uit deze map naar dezelfde webmap:
 - icon-192.png
 - icon-512.png
 
-Open daarna de https://-URL in Safari.
-Op iPhone: Deel > Zet op beginscherm / Open als webapp.
+Open daarna je bestaande GitHub Pages-adres opnieuw.
 
-Safari JavaScript:
-Instellingen > Apps > Safari > Geavanceerd > JavaScript moet ingeschakeld zijn.
+BELANGRIJK BIJ EEN UPDATE
+Safari kan de oude webapp nog uit cache tonen. Zie je niet 'webapp v8' bovenaan:
+1. laad de pagina opnieuw;
+2. sluit de webapp volledig en open opnieuw;
+3. indien nodig verwijder de beginscherm-app en voeg hem opnieuw toe.
+
+CONTROLE
+Naast 'webapp v8' moet groen '● actief' staan. Dan draait JavaScript correct.

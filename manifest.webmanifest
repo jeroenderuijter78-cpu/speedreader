@@ -1,7 +1,7 @@
 {
   "name": "Speed Reader",
   "short_name": "Speed Reader",
-  "description": "Speed reading en voorlezen voor Nederlands, Engels, Frans, Duits en Spaans.",
+  "description": "Speed reading en voorlezen van tekst, EPUB, PDF, Word en Pages.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
