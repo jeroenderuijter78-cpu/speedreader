@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#050505">
+<title>Speed Reader Mobile</title>
+<style>
+:root{
+  --bg:#050505;--panel:#101010;--panel2:#181818;--line:#2b2b2b;
+  --text:#f5f5f5;--muted:#999;--accent:#ff3b30;--ok:#82d982;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{
+  min-height:100dvh;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+  -webkit-text-size-adjust:100%;
+}
+button,select,input,textarea{font:inherit}
+button,select,input[type=number]{
+  min-height:44px;background:var(--panel2);color:var(--text);
+  border:1px solid #383838;border-radius:12px;padding:9px 12px;
+}
+button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button.primary{background:#f4f4f4;color:#050505;border-color:#f4f4f4;font-weight:700}
+button.active{border-color:#777;background:#292929}
+button:disabled{opacity:.45}
+
+header{
+  position:sticky;top:0;z-index:10;background:rgba(8,8,8,.96);
+  border-bottom:1px solid var(--line);padding:10px 12px;
+}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-weight:750}.brand b{color:var(--accent)}.version{font-size:11px;color:#666;font-weight:400}
+.tabs{display:flex;gap:6px}
+.tabs button{min-height:38px;padding:7px 11px}
+
+.reader{
+  position:relative;height:40dvh;min-height:250px;max-height:500px;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.guide{position:absolute;left:50%;top:15%;bottom:15%;width:1px;background:rgba(255,255,255,.07)}
+.word{
+  position:absolute;left:50%;top:50%;white-space:nowrap;
+  transform:translate(0,-50%);font-size:clamp(46px,13vw,86px);
+  font-weight:650;line-height:1;
+}
+.char{display:inline-block}.focus{color:var(--accent)}
+.placeholder{max-width:85%;text-align:center;color:#555;font-size:18px;line-height:1.4}
+.modebadge{position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:12px;color:#777}
+
+main{padding:12px;max-width:1000px;margin:auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:12px;margin-bottom:10px}
+.progressrow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.track{height:6px;flex:1;border-radius:99px;background:#222;overflow:hidden}
+.bar{height:100%;width:0;background:#ddd}
+
+.sourcebar,.row,.buttons{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filebtn{
+  min-height:44px;display:inline-flex;align-items:center;justify-content:center;
+  background:var(--panel2);border:1px solid #383838;border-radius:12px;padding:9px 12px;font-weight:650
+}
+.filebtn input{display:none}
+.status{font-size:12px;color:var(--muted);flex:1;min-width:150px}
+.status.ok{color:var(--ok)}.status.err{color:#ff8f87}
+textarea{
+  width:100%;min-height:120px;background:#0d0d0d;color:#eee;border:1px solid #303030;
+  border-radius:12px;padding:12px;resize:vertical;line-height:1.45;font-size:16px
+}
+label.small{font-size:12px;color:#aaa}
+select{max-width:100%}
+.grow{flex:1;min-width:180px}
+.rangegroup{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;width:100%}
+input[type=range]{width:100%;accent-color:#ddd}
+#wpmNumber{width:76px;text-align:center}
+.readControls,.listenControls{display:none}
+.readControls.visible,.listenControls.visible{display:block}
+.note{font-size:12px;color:#777;line-height:1.4;margin-top:8px}
+
+.focusMode{
+  position:fixed!important;inset:0!important;z-index:999!important;
+  width:100vw!important;height:100dvh!important;max-height:none!important;
+  background:#050505!important;
+}
+.focusMode .modebadge{top:calc(12px + env(safe-area-inset-top))}
+.focusExit{
+  display:none;position:fixed;right:12px;top:calc(12px + env(safe-area-inset-top));
+  z-index:1000;min-height:40px
+}
+.focusExit.show{display:block}
+
+@media (min-width:760px){
+  .reader{height:46vh}
+  main{display:grid;grid-template-columns:1.2fr .8fr;gap:10px}
+  .sourcecard{grid-row:span 2}
+}
+</style>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-title" content="Speed Reader">
+
+</head>
+<body>
+
+<header>
+  <div class="toprow">
+    <div class="brand">Speed <b>Reader</b> <span class="version">webapp v7</span> <span id="jsStatus" class="version" style="margin-left:6px">● script niet gestart</span></div>
+    <div class="tabs">
+      <button id="readTab" class="active">Lezen</button>
+      <button id="listenTab">Luisteren</button>
+    </div>
+    <button id="focusBtn">Focus</button>
+  </div>
+</header>
+
+<section id="reader" class="reader">
+  <div class="guide"></div>
+  <div id="modeBadge" class="modebadge">Leesmodus</div>
+  <div id="placeholder" class="placeholder">Plak een tekst of open een EPUB.</div>
+  <div id="word" class="word" aria-live="polite"></div>
+</section>
+<button id="focusExit" class="focusExit">Sluiten</button>
+
+<main>
+  <section class="card sourcecard">
+    <div class="progressrow">
+      <span id="counter">0 / 0</span>
+      <div class="track"><div id="bar" class="bar"></div></div>
+      <span id="remaining">0:00</span>
+    </div>
+
+    <div class="sourcebar" style="margin-top:12px">
+      <label class="filebtn">📖 EPUB openen
+        <input id="epubInput" type="file" accept=".epub,application/epub+zip">
+      </label>
+      <span id="epubStatus" class="status">Alles wordt lokaal op het apparaat verwerkt.</span>
+    </div>
+
+    <div id="chapterBox" class="row" style="display:none;margin-top:10px">
+      <label class="small" for="chapterSelect">Hoofdstuk</label>
+      <select id="chapterSelect" class="grow"></select>
+    </div>
+
+    <textarea id="textInput" style="margin-top:10px" placeholder="Plak hier een tekst...">Speed reading werkt door woorden snel na elkaar op één vaste plek te tonen. Op een iPhone kun je ook de luistermodus gebruiken. Kies een taal en een stem en laat Safari de tekst voorlezen.</textarea>
+  </section>
+
+  <section id="readControls" class="card readControls visible">
+    <div class="rangegroup">
+      <label class="small">Snelheid</label>
+      <input id="wpmRange" type="range" min="60" max="1200" step="10" value="300">
+      <input id="wpmNumber" type="number" min="60" max="1200" step="10" value="300">
+    </div>
+    <div class="buttons" style="margin-top:10px">
+      <button id="readStart" class="primary">Start</button>
+      <button id="readReset">Opnieuw</button>
+      <label class="small" style="display:flex;align-items:center;gap:6px;margin-left:auto">
+        <input id="punctuation" type="checkbox" checked> pauze bij leestekens
+      </label>
+    </div>
+  </section>
+
+  <section id="listenControls" class="card listenControls">
+    <div class="row">
+      <label class="small" for="languageSelect">Taal</label>
+      <select id="languageSelect" class="grow">
+        <option value="nl-NL">Nederlands</option>
+        <option value="en-GB">Engels</option>
+        <option value="fr-FR">Frans</option>
+        <option value="de-DE">Duits</option>
+        <option value="es-ES">Spaans</option>
+      </select>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <label class="small" for="voiceSelect">Stem</label>
+      <select id="voiceSelect" class="grow"><option value="">Standaardstem</option></select>
+      <button id="refreshVoices" title="Stemmen opnieuw laden">↻</button>
+    </div>
+
+    <div class="rangegroup" style="margin-top:10px">
+      <label class="small">Tempo</label>
+      <input id="speechRate" type="range" min="0.5" max="2" step="0.05" value="1">
+      <span id="speechRateValue" class="small">1.00×</span>
+    </div>
+
+    <div class="buttons" style="margin-top:10px">
+      <button id="listenStart" class="primary">Voorlezen</button>
+      <button id="listenPause">Pauze</button>
+      <button id="listenStop">Stop</button>
+      <button id="toggleWords">Woorden verbergen</button>
+    </div>
+
+    <div id="speechNote" class="note">
+      Er verschijnen maximaal twee stemmen voor de gekozen taal. Als iOS geen stemmenlijst teruggeeft, gebruikt de app automatisch de standaardstem voor die taal.
+    </div>
+  </section>
+</main>
+
+<script src="./app.js" defer></script>
+</body>
+</html>
